@@ -1,5 +1,7 @@
 import { Length, IsEmail } from 'class-validator';
 import { InputType, Field } from 'type-graphql';
+import { IsEmailAlreadyExist } from './isEmailAlreadyExist';
+
 // ユーザーからの入力を受け付ける
 @InputType()
 export class RegisterInput {
@@ -9,6 +11,7 @@ export class RegisterInput {
 
   @Field()
   @IsEmail()
+  @IsEmailAlreadyExist({ message: 'このメールアドレスは既に使われています' })
   email: string;
 
   @Field()
