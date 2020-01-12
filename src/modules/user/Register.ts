@@ -1,11 +1,13 @@
-import { Resolver, Query, Mutation, Arg } from 'type-graphql';
+import { Resolver, Query, Mutation, Arg, UseMiddleware } from 'type-graphql';
 import bcrypt from 'bcryptjs';
 import { User } from '../../entity/User';
 import { RegisterInput } from './register/RegistarInput';
+import { isAuth } from '../middleware/isAuth';
 // 登録スキーマ
 @Resolver()
 export class RegisterResolver {
-  // Hello,Worldするためのクエリ
+  // 認証済みユーザーのみHelloWorldが可能
+  @UseMiddleware(isAuth)
   @Query(() => String)
   async hello() {
     return 'Hello,World';
