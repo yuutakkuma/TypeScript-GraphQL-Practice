@@ -11,14 +11,16 @@ import { redis } from './redis';
 import { LoginResolver } from './modules/user/Login';
 import { MeResolver } from './modules/user/Me';
 
-// import cors from 'cors';
-
 const main = async () => {
   // DBと接続
   await createConnection();
   // スキーマをビルド
   const schema = await buildSchema({
-    resolvers: [MeResolver, RegisterResolver, LoginResolver]
+    resolvers: [MeResolver, RegisterResolver, LoginResolver],
+    authChecker: ({ context: { req } }) => {
+      // ユーザーがログインしてたらtrueを返す
+      return !!req.session.userId;
+    }
   });
   // インスタンス作成（スキーマを代入している）
   const apolloServer = new ApolloServer({
@@ -27,13 +29,6 @@ const main = async () => {
     context: ({ req }: any) => ({ req })
   });
   const app = Express();
-  // データのアクセスを許可できるWebサイトを設定、クライアントがSwiftの場合必要なのか？
-  // app.use(
-  //   cors({
-  //     credentials: true,
-  //     origin: 'http://localhost:3000'
-  //   })
-  // );
   const RedisStore = connectRedis(session);
   // クッキーの設定
   app.use(
