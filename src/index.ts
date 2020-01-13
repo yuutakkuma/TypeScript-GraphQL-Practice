@@ -3,20 +3,17 @@ import 'reflect-metadata';
 import { ApolloServer } from 'apollo-server-express';
 import Express from 'express';
 import { buildSchema } from 'type-graphql';
-import { RegisterResolver } from './modules/user/Register';
 import { createConnection } from 'typeorm';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
 import { redis } from './redis';
-import { LoginResolver } from './modules/user/Login';
-import { MeResolver } from './modules/user/Me';
 
 const main = async () => {
   // DBと接続
   await createConnection();
   // スキーマをビルド
   const schema = await buildSchema({
-    resolvers: [MeResolver, RegisterResolver, LoginResolver],
+    resolvers: [__dirname + '/modules/**/*.ts'],
     authChecker: ({ context: { req } }) => {
       // ユーザーがログインしてたらtrueを返す
       return !!req.session.userId;
@@ -26,7 +23,7 @@ const main = async () => {
   const apolloServer = new ApolloServer({
     schema,
     // 同じリクエストオブジェクトを持っているコンテキストでのみアクセス出来る
-    context: ({ req }: any) => ({ req })
+    context: ({ req, res }: any) => ({ req, res })
   });
   const app = Express();
   const RedisStore = connectRedis(session);
